@@ -288,64 +288,55 @@ precision = 0.1; % deg
 % One planning file for the KUKA robot is written for each motion
 % Angles are cumulative (i.e. after 30° of flexion, only 30° needed to
 % reach 60°)
-% motionList = {'anatomicAlignementZ' 'Z' 0:sign(Euler(1))*precision:Euler(1); ...
-%               'anatomicAlignementX' 'X' 0:sign(Euler(2))*precision:Euler(2); ...
-%               'anatomicAlignementY' 'Y' 0:sign(Euler(3))*precision:Euler(3); ...
-%               'extension40'         'Z' 0:1*precision:40; ...
-%               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
-%               'intRotation90b'      'Y' 0:1*precision:90; ... % return
-%               'extRotation90a'      'Y' 0:1*precision:90; ... % go
-%               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
-%               'extension20'         'Z' 0:-1*precision:-20; ...
-%               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
-%               'intRotation90b'      'Y' 0:1*precision:90; ... % return
-%               'extRotation90a'      'Y' 0:1*precision:90; ... % go
-%               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
-%               'flexion0'            'Z' 0:-1*precision:-20; ...
-%               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
-%               'intRotation90b'      'Y' 0:1*precision:90; ... % return
-%               'extRotation90a'      'Y' 0:1*precision:90; ... % go
-%               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
-%               'flexion20'           'Z' 0:-1*precision:-20; ...
-%               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
-%               'intRotation90b'      'Y' 0:1*precision:90; ... % return
-%               'extRotation90a'      'Y' 0:1*precision:90; ... % go
-%               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
-%               'flexion40'           'Z' 0:-1*precision:-20; ...
-%               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
-%               'intRotation90b'      'Y' 0:1*precision:90; ... % return
-%               'extRotation90a'      'Y' 0:1*precision:90; ... % go
-%               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
-%               'flexion60'           'Z' 0:-1*precision:-20; ...
-%               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
-%               'intRotation90b'      'Y' 0:1*precision:90; ... % return
-%               'extRotation90a'      'Y' 0:1*precision:90; ... % go
-%               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
-%               'flexion80'           'Z' 0:-1*precision:-20; ...
-%               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
-%               'intRotation90b'      'Y' 0:1*precision:90; ... % return
-%               'extRotation90a'      'Y' 0:1*precision:90; ... % go
-%               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
-%               'flexion100'          'Z' 0:-1*precision:-20; ...
-%               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
-%               'intRotation90b'      'Y' 0:1*precision:90; ... % return
-%               'extRotation90a'      'Y' 0:1*precision:90; ... % go
-%               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
-%               'flexion120'          'Z' 0:-1*precision:-20; ...
-%               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
-%               'intRotation90b'      'Y' 0:1*precision:90; ... % return
-%               'extRotation90a'      'Y' 0:1*precision:90; ... % go
-%               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
-%               'flexion0'            'Z' 0:1*precision:120; ...
-%               };
 motionList = {'anatomicAlignementZ' 'Z' 0:sign(Euler(1))*precision:Euler(1); ...
               'anatomicAlignementX' 'X' 0:sign(Euler(2))*precision:Euler(2); ...
               'anatomicAlignementY' 'Y' 0:sign(Euler(3))*precision:Euler(3); ...
-              'extension20'         'Z' 0:1*precision:20; ...
+              'extension40'         'Z' 0:1*precision:40; ...
               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
               'intRotation90b'      'Y' 0:1*precision:90; ... % return
               'extRotation90a'      'Y' 0:1*precision:90; ... % go
               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
+              'extension20'         'Z' 0:-1*precision:-20; ...
+              'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
+              'intRotation90b'      'Y' 0:1*precision:90; ... % return
+              'extRotation90a'      'Y' 0:1*precision:90; ... % go
+              'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
+              'flexion0'            'Z' 0:-1*precision:-20; ...
+              'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
+              'intRotation90b'      'Y' 0:1*precision:90; ... % return
+              'extRotation90a'      'Y' 0:1*precision:90; ... % go
+              'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
+              'flexion20'           'Z' 0:-1*precision:-20; ...
+              'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
+              'intRotation90b'      'Y' 0:1*precision:90; ... % return
+              'extRotation90a'      'Y' 0:1*precision:90; ... % go
+              'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
+              'flexion40'           'Z' 0:-1*precision:-20; ...
+              'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
+              'intRotation90b'      'Y' 0:1*precision:90; ... % return
+              'extRotation90a'      'Y' 0:1*precision:90; ... % go
+              'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
+              'flexion60'           'Z' 0:-1*precision:-20; ...
+              'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
+              'intRotation90b'      'Y' 0:1*precision:90; ... % return
+              'extRotation90a'      'Y' 0:1*precision:90; ... % go
+              'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
+              'flexion80'           'Z' 0:-1*precision:-20; ...
+              'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
+              'intRotation90b'      'Y' 0:1*precision:90; ... % return
+              'extRotation90a'      'Y' 0:1*precision:90; ... % go
+              'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
+              'flexion100'          'Z' 0:-1*precision:-20; ...
+              'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
+              'intRotation90b'      'Y' 0:1*precision:90; ... % return
+              'extRotation90a'      'Y' 0:1*precision:90; ... % go
+              'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
+              'flexion120'          'Z' 0:-1*precision:-20; ...
+              'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
+              'intRotation90b'      'Y' 0:1*precision:90; ... % return
+              'extRotation90a'      'Y' 0:1*precision:90; ... % go
+              'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
+              'flexion0'            'Z' 0:1*precision:120; ...
               };
 
 % Generate requested motions
@@ -353,10 +344,26 @@ motionList = {'anatomicAlignementZ' 'Z' 0:sign(Euler(1))*precision:Euler(1); ...
 % Erase the previous version of the T_ics_fl matrix
 for imotion = 1:size(motionList,1)
     [T_ics_f,T_ics_fl,start,stop] = AddMotion(Subject,Folder,motionList{imotion,3},motionList{imotion,2},T_ics_f,T_ics_fl,T_f_fl,stop,imotion,motionList{imotion,1});
-    temp                          = Mprod_array3(Tinv_array3(T_ics_p),T_ics_f(:,:,end));
-    Euler2                        = rad2deg(R2mobileZXY_array3(temp(1:3,1:3,:))); % Difference with target for each angle should be <1°
+    % Check angular values
+    temp = Mprod_array3(Tinv_array3(T_ics_p),T_ics_f(:,:,end));
+    R    = temp(1:3,1:3);
+    % Re-orgonalise the temp rotation matrix
+    % https://stackoverflow.com/questions/23080791/eigen-re-orthogonalization-of-rotation-matrix
+    x     = temp(1:3,1);
+    y     = temp(1:3,2);
+    z     = temp(1:3,3);
+    error = dot(x,y);
+    x_ort = x-(error/2)*y;
+    y_ort = y-(error/2)*x;
+    z_ort = cross(x_ort,y_ort);
+    x_new = x_ort/norm(x_ort);
+    y_new = y_ort/norm(y_ort);
+    z_new = z_ort/norm(z_ort);
+    R_new = [x_new y_new z_new];
+    % Plot the resulting angular values
+    Euler2 = rad2deg(R2mobileZXY_array3(R_new)); % Difference with target for each angle should be <1°
     disp(['Angle values around each axis of the hip JCS (ZXY): ',num2str(round(Euler2(1),1)),' | ',num2str(round(Euler2(2),1)),' | ',num2str(round(Euler2(3),1)),'°']);
-    clear temp Euler2;    
+    clear temp R x y z error x_ort y_ort z_ort x_new y_new z_new R_new Euler2;    
 end
 
 %% Plot (ONLY FOR TEST)
