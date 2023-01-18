@@ -258,11 +258,11 @@ Rf      = [Xf Yf Zf];
 Of      = Marker.PELVIS_RHJC;
 T_ics_f = [Rf Of; 0 0 0 1];
 
-% Define KUKA_flange coordinate system (currently defined as an ISB segment)
+% Define KUKA_flange coordinate system
 Xfl      = Vnorm_array3(Marker.KUKA_flange_X1-Marker.KUKA_flange_X2);
-Zfl      = -Vnorm_array3(Marker.KUKA_flange_Y1-Marker.KUKA_flange_Y2);
-Yfl      = Vnorm_array3(cross(Zfl,Xfl));
+Yfl      = Vnorm_array3(Marker.KUKA_flange_Y1-Marker.KUKA_flange_Y2);
 Zfl      = Vnorm_array3(cross(Xfl,Yfl));
+Xfl      = Vnorm_array3(cross(Yfl,Zfl));
 Rfl      = [Xfl Yfl Zfl];
 Ofl      = Marker.KUKA_flange_Y2;
 T_ics_fl = [Rfl Ofl; 0 0 0 1];
@@ -288,55 +288,64 @@ precision = 0.1; % deg
 % One planning file for the KUKA robot is written for each motion
 % Angles are cumulative (i.e. after 30° of flexion, only 30° needed to
 % reach 60°)
+% motionList = {'anatomicAlignementZ' 'Z' 0:sign(Euler(1))*precision:Euler(1); ...
+%               'anatomicAlignementX' 'X' 0:sign(Euler(2))*precision:Euler(2); ...
+%               'anatomicAlignementY' 'Y' 0:sign(Euler(3))*precision:Euler(3); ...
+%               'extension40'         'Z' 0:1*precision:40; ...
+%               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
+%               'intRotation90b'      'Y' 0:1*precision:90; ... % return
+%               'extRotation90a'      'Y' 0:1*precision:90; ... % go
+%               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
+%               'extension20'         'Z' 0:-1*precision:-20; ...
+%               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
+%               'intRotation90b'      'Y' 0:1*precision:90; ... % return
+%               'extRotation90a'      'Y' 0:1*precision:90; ... % go
+%               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
+%               'flexion0'            'Z' 0:-1*precision:-20; ...
+%               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
+%               'intRotation90b'      'Y' 0:1*precision:90; ... % return
+%               'extRotation90a'      'Y' 0:1*precision:90; ... % go
+%               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
+%               'flexion20'           'Z' 0:-1*precision:-20; ...
+%               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
+%               'intRotation90b'      'Y' 0:1*precision:90; ... % return
+%               'extRotation90a'      'Y' 0:1*precision:90; ... % go
+%               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
+%               'flexion40'           'Z' 0:-1*precision:-20; ...
+%               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
+%               'intRotation90b'      'Y' 0:1*precision:90; ... % return
+%               'extRotation90a'      'Y' 0:1*precision:90; ... % go
+%               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
+%               'flexion60'           'Z' 0:-1*precision:-20; ...
+%               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
+%               'intRotation90b'      'Y' 0:1*precision:90; ... % return
+%               'extRotation90a'      'Y' 0:1*precision:90; ... % go
+%               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
+%               'flexion80'           'Z' 0:-1*precision:-20; ...
+%               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
+%               'intRotation90b'      'Y' 0:1*precision:90; ... % return
+%               'extRotation90a'      'Y' 0:1*precision:90; ... % go
+%               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
+%               'flexion100'          'Z' 0:-1*precision:-20; ...
+%               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
+%               'intRotation90b'      'Y' 0:1*precision:90; ... % return
+%               'extRotation90a'      'Y' 0:1*precision:90; ... % go
+%               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
+%               'flexion120'          'Z' 0:-1*precision:-20; ...
+%               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
+%               'intRotation90b'      'Y' 0:1*precision:90; ... % return
+%               'extRotation90a'      'Y' 0:1*precision:90; ... % go
+%               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
+%               'flexion0'            'Z' 0:1*precision:120; ...
+%               };
 motionList = {'anatomicAlignementZ' 'Z' 0:sign(Euler(1))*precision:Euler(1); ...
               'anatomicAlignementX' 'X' 0:sign(Euler(2))*precision:Euler(2); ...
               'anatomicAlignementY' 'Y' 0:sign(Euler(3))*precision:Euler(3); ...
-              'extension40'         'Z' 0:1*precision:40; ...
+              'extension20'         'Z' 0:1*precision:20; ...
               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
               'intRotation90b'      'Y' 0:1*precision:90; ... % return
               'extRotation90a'      'Y' 0:1*precision:90; ... % go
               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
-              'extension20'         'Z' 0:-1*precision:-20; ...
-              'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
-              'intRotation90b'      'Y' 0:1*precision:90; ... % return
-              'extRotation90a'      'Y' 0:1*precision:90; ... % go
-              'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
-              'flexion0'            'Z' 0:-1*precision:-20; ...
-              'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
-              'intRotation90b'      'Y' 0:1*precision:90; ... % return
-              'extRotation90a'      'Y' 0:1*precision:90; ... % go
-              'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
-              'flexion20'           'Z' 0:-1*precision:-20; ...
-              'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
-              'intRotation90b'      'Y' 0:1*precision:90; ... % return
-              'extRotation90a'      'Y' 0:1*precision:90; ... % go
-              'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
-              'flexion40'           'Z' 0:-1*precision:-20; ...
-              'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
-              'intRotation90b'      'Y' 0:1*precision:90; ... % return
-              'extRotation90a'      'Y' 0:1*precision:90; ... % go
-              'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
-              'flexion60'           'Z' 0:-1*precision:-20; ...
-              'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
-              'intRotation90b'      'Y' 0:1*precision:90; ... % return
-              'extRotation90a'      'Y' 0:1*precision:90; ... % go
-              'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
-              'flexion80'           'Z' 0:-1*precision:-20; ...
-              'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
-              'intRotation90b'      'Y' 0:1*precision:90; ... % return
-              'extRotation90a'      'Y' 0:1*precision:90; ... % go
-              'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
-              'flexion100'          'Z' 0:-1*precision:-20; ...
-              'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
-              'intRotation90b'      'Y' 0:1*precision:90; ... % return
-              'extRotation90a'      'Y' 0:1*precision:90; ... % go
-              'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
-              'flexion120'          'Z' 0:-1*precision:-20; ...
-              'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
-              'intRotation90b'      'Y' 0:1*precision:90; ... % return
-              'extRotation90a'      'Y' 0:1*precision:90; ... % go
-              'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
-              'flexion0'            'Z' 0:1*precision:120; ...
               };
 
 % Generate requested motions
@@ -359,7 +368,7 @@ Marker.RFEMUR_RFME = Mprod_array3(T_ics_f,repmat(localRFME,[1 1 stop+1]));
 Marker.RFEMUR_RKJC = Mprod_array3(T_ics_f,repmat(localRKJC,[1 1 stop+1]));
 
 figure;
-for iframe = 1:100:stop
+for iframe = 1:50:stop
     % Markers
     plot3(Marker.PELVIS_RASI(1,:,1),Marker.PELVIS_RASI(2,:,1),Marker.PELVIS_RASI(3,:,1),'Marker','.','MarkerSize',20,'Color','black');
     hold on; axis equal;

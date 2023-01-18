@@ -64,8 +64,8 @@ if order < 10
 else
     ord = num2str(order);
 end
-O_flange = T_ics_fl(1:3,4,start:stop);
-R_flange = [T_ics_fl(1:3,1,start:stop) -T_ics_fl(1:3,3,start:stop) T_ics_fl(1:3,2,start:stop)]; % Set correct flange axex from KUKA point of view
+O_flange = T_ics_fl(1:3,4,start:stop)*1e-3; % mm to m
+R_flange = T_ics_fl(1:3,1:3,start:stop);
 Q_flange = newR2q_array3(R_flange);
 Name     = [ord,'_',motion,'_',Subject.id,'_',Subject.side,'.mat'];
 cd(Folder.export); 
