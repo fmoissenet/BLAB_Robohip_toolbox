@@ -35,3 +35,33 @@ fMarker     = btkGetPointFrequency(btkFile); % Marker trajectories frequency
 for imarker = 1:size(markerNames,1)
     Marker.(markerNames{imarker}) = permute(Marker.(markerNames{imarker}),[2,3,1]);
 end
+
+% Replace zeros by nan
+% -------------------------------------------------------------------------
+for imarker = 1:size(markerNames,1)
+    for iframe = 1:nMarker
+        if Marker.(markerNames{imarker})(:,:,iframe) == [0 0 0]
+           Marker.(markerNames{imarker})(:,:,iframe) = nan(3,1,1);
+        else
+           Marker.(markerNames{imarker})(:,:,iframe) = Marker.(markerNames{imarker})(:,:,iframe);
+        end
+    end
+end
+
+% % Fill gaps
+% % -------------------------------------------------------------------------
+% tMarker = [];
+% for imarker = 1:size(markerNames,1)
+%     if ~isempty(Marker.(markerNames{imarker}))
+%         tMarker = [tMarker permute(Marker.(markerNames{imarker}),[3,1,2])];
+%     end
+% end
+% tMarker = PredictMissingMarkers(tMarker,'Algorithm',2);
+% k = 0;
+% for imarker = 1:size(markerNames,1)
+%     if ~isempty(Marker.(markerNames{imarker}))
+%         k = k+1;
+%         Marker.(markerNames{imarker}) = permute(tMarker(:,(3*k)-2:3*k),[2,3,1]);
+%     end
+% end
+% clear k tMarker;

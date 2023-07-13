@@ -18,7 +18,7 @@
 % Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 % -------------------------------------------------------------------------
 
-function [T_ics_f,T_ics_fl,start,stop] = AddMotion(Subject,Folder,angles,rotationAxis,T_ics_f,T_ics_fl,T_f_fl,stop,order,motion)
+function [T_ics_f,T_ics_fl,start,stop] = AddMotion(T_ics_p,Specimen,Folder,angles,rotationAxis,T_ics_f,T_ics_fl,T_f_fl,stop,order,motion)
 
 % Set start and stop frames related to the generated motion
 n = size(angles,2);
@@ -56,7 +56,10 @@ T_ics_f  = cat(3,T_ics_f,Mprod_array3(repmat(T_ics_f0,[1 1 size(T_f2_f1,3)]),Min
 % Store position/orientation of the flange in cameras coordinate system 
 % for each frame of the motion (apply a rigid transformation T_f_fl to the
 % previously computed position/orientation of the femur)
-T_ics_fl = cat(3,T_ics_fl,Mprod_array3(Mprod_array3(repmat(T_ics_f0,[1 1 size(T_f2_f1,3)]),Minv_array3(T_f2_f1)),repmat(T_f_fl,[1 1 size(Mprod_array3(repmat(T_ics_f0,[1 1 size(T_f2_f1,3)]),Minv_array3(T_f2_f1)),3)])));
+T_ics_fl = Mprod_array3(T_ics_f,repmat(T_f_fl,[1 1 size(T_ics_f,3)]));
+if order == 1
+    T_ics_fl(:,4,:) = T_ics_fl(:,4,:)+repmat([0 0 1.5 1]',[1 1 size(T_ics_fl,3)]); % Not explained yet
+end
 
 % Generate the planning file for the KUKA robot
 if order < 10
@@ -67,6 +70,6 @@ end
 O_flange = T_ics_fl(1:3,4,start:stop)*1e-3; % mm to m
 R_flange = T_ics_fl(1:3,1:3,start:stop);
 Q_flange = newR2q_array3(R_flange);
-Name     = [ord,'_',motion,'_',Subject.id,'_',Subject.side,'.mat'];
+Name     = [ord,'_',motion,'_',Specimen.id,'_',Specimen.side,'.mat'];
 cd(Folder.export); 
 save(Name,'O_flange','Q_flange');

@@ -22,7 +22,7 @@
 
 % Load marker trajectories stored in C3D files
 % cd(Folder.toolbox);
-cd('C:\Users\moissene\OneDrive - unige.ch\2022 - ROBOHIP\Données\Tests_20230111');
+cd('C:\Users\moissene\OneDrive - unige.ch\2022 - ROBOHIP\Données\Essais_20230608');
 c3dFile = 'stylus2Calibration01.c3d';
 btkFile = btkReadAcquisition(c3dFile);
 Marker  = btkGetMarkers(btkFile);

@@ -31,7 +31,7 @@ mx=mean(x);
 my=mean(y);
 
 % construct matrices A and B, subtract the mean so there is only rotation
-for i=1:nmarkers
+for i=1:nmarkers,
   A(i,:)=x(i,:)-mx;
   B(i,:)=y(i,:)-my;
 end
