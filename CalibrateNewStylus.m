@@ -18,20 +18,40 @@
 % Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 % -------------------------------------------------------------------------
 
-% function STY06 = CalibrateStylus(Folder)
+% -------------------------------------------------------------------------
+% INIT THE WORKSPACE
+% -------------------------------------------------------------------------
+clearvars;
+close all;
+warning off;
+clc;
 
+% -------------------------------------------------------------------------
+% SET FOLDERS
+% -------------------------------------------------------------------------
+Folder.toolbox = 'C:\Users\moissene\OneDrive - unige.ch\2022 - ROBOHIP\Development\Biomécanique\BLAB_Robohip_toolbox\';
+Folder.data    = 'C:\Users\moissene\OneDrive - unige.ch\2022 - ROBOHIP\Data\Tests\STYLUSa_20280908\';
+Folder.export  = 'C:\Users\moissene\OneDrive - unige.ch\2022 - ROBOHIP\Data\Tests\STYLUSa_20280908\';
+Folder.dep     = [Folder.toolbox,'dependencies\'];
+addpath(Folder.toolbox);
+addpath(genpath(Folder.dep));
+cd(Folder.data);
+
+% -------------------------------------------------------------------------
+% STYLUS CALIBRATION
+% -------------------------------------------------------------------------
 % Load marker trajectories stored in C3D files
 % cd(Folder.toolbox);
-cd('C:\Users\moissene\OneDrive - unige.ch\2022 - ROBOHIP\Données\Essais_20230608');
-c3dFile = 'NewStylus_Calibration.c3d';
+cd('C:\Users\moissene\OneDrive - unige.ch\2022 - ROBOHIP\Data\Tests\STYLUSa_20280908');
+c3dFile = 'STYLUSa.c3d';
 btkFile = btkReadAcquisition(c3dFile);
 Marker  = btkGetMarkers(btkFile);
-nMarker = length(Marker.NEWSTYLUS_01); % n frames stored in the marker trajectories
+nMarker = length(Marker.STYLUSa_01); % n frames stored in the marker trajectories
 % Define stylus coordinate system
-Os = Marker.NEWSTYLUS_07;
-Ys = (Marker.NEWSTYLUS_03-Marker.NEWSTYLUS_07);
+Os = Marker.STYLUSa_07;
+Ys = (Marker.STYLUSa_03-Marker.STYLUSa_07);
 Ys = Ys./sqrt(Ys(:,1).^2+Ys(:,2).^2+Ys(:,3).^2); 
-Xs = (Marker.NEWSTYLUS_05-Marker.NEWSTYLUS_01);
+Xs = (Marker.STYLUSa_05-Marker.STYLUSa_01);
 Xs = Xs./sqrt(Xs(:,1).^2+Xs(:,2).^2+Xs(:,3).^2);
 Zs = cross(Xs,Ys);
 Xs = cross(Ys,Zs);

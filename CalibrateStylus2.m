@@ -22,8 +22,8 @@
 
 % Load marker trajectories stored in C3D files
 % cd(Folder.toolbox);
-cd('C:\Users\moissene\OneDrive - unige.ch\2022 - ROBOHIP\Données\Essais_20230608');
-c3dFile = 'stylus2Calibration01.c3d';
+cd('C:\Users\moissene\OneDrive - unige.ch\2022 - ROBOHIP\Données\NewStylus_20230825');
+c3dFile = 'Measurement2.c3d';
 btkFile = btkReadAcquisition(c3dFile);
 Marker  = btkGetMarkers(btkFile);
 nMarker = length(Marker.STY2_1); % n frames stored in the marker trajectories
