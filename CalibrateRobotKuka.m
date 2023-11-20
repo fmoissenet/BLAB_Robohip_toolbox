@@ -16,6 +16,16 @@ addpath(Folder.toolbox);
 addpath(genpath(Folder.dep));
 cd(Folder.data);
 
+% -------------------------------------------------------------------------
+% QTM PARAMETERS
+% -------------------------------------------------------------------------
+% Processing > 3D tracking > Prediction error = 0.5 mm
+%                          > Maximum residual = 0.5 mm
+%                          > Minimum trajectory length = 10 frames
+% Processing > 6DOF Tracking > KUKA_flange > Virtual / Min. markers = 4
+%                                          > Id / Max. residual = 0.5 mm
+%                                          > Bone tolerance = 0.5 mm
+
 %% ------------------------------------------------------------------------
 % OPTIMISE ROBOT BASE POSE IN CAMERA FRAME
 % -------------------------------------------------------------------------
