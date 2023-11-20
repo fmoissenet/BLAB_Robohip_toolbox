@@ -12,7 +12,7 @@ clc;
 % SET FOLDERS
 % -------------------------------------------------------------------------
 Folder.toolbox = 'C:\Users\moissene\OneDrive - unige.ch\2022 - ROBOHIP\Development\Biomécanique\BLAB_Robohip_toolbox\';
-Folder.data    = 'C:\Users\moissene\OneDrive - unige.ch\2022 - ROBOHIP\Development\Biomécanique\reference_frames\';
+Folder.data    = 'C:\Users\moissene\OneDrive - unige.ch\2022 - ROBOHIP\Development\Biomécanique\calibrage_TRIPTERON\';
 Folder.dep     = [Folder.toolbox,'dependencies\'];
 addpath(Folder.toolbox);
 addpath(genpath(Folder.dep));
@@ -26,10 +26,10 @@ figure; hold on; axis equal;
 c3dFile = 'LFRAME01.c3d';
 btkFile = btkReadAcquisition(c3dFile);
 Marker  = btkGetMarkers(btkFile);
-TRIPTERON_p1 = mean(Marker.LFRAME01);
-TRIPTERON_p2 = mean(Marker.LFRAME02);
-TRIPTERON_p3 = mean(Marker.LFRAME03);
-TRIPTERON_p4 = mean(Marker.LFRAME04);
+TRIPTERON_p1 = mean(Marker.TRIPTERON_p1);
+TRIPTERON_p2 = mean(Marker.TRIPTERON_p2);
+TRIPTERON_p3 = mean(Marker.TRIPTERON_p3);
+TRIPTERON_p4 = mean(Marker.TRIPTERON_p4);
 % Initialise new btk file
 newbtkFile = btkNewAcquisition();
 btkSetFrequency(newbtkFile,100);
@@ -48,13 +48,13 @@ clearvars -except Folder Tripteron newbtkFile;
 c3dFile = 'LINMOTX01.c3d';
 btkFile = btkReadAcquisition(c3dFile);
 Marker  = btkGetMarkers(btkFile);
-pointCloud1 = Marker.NEWSTYLUS_09;
+pointCloud1 = Marker.STYLUSa_TIP;
 [x1,a1] = lsplane(pointCloud1);
 % Axis estimation by least-square cylinder approach
 c3dFile = 'LINMOTX02.c3d';
 btkFile = btkReadAcquisition(c3dFile);
 Marker  = btkGetMarkers(btkFile);
-pointCloud2 = Marker.NEWSTYLUS_09;
+pointCloud2 = Marker.STYLUSa_TIP;
 [x2,a2] = lscylinder(pointCloud2,x1,a1,1,1,0.025);
 % Error between the two estimated axes (3d angle, deg)
 errorAngle = rad2deg(atan2(norm(cross(a1,a2)),dot(a1,a2)))
@@ -64,7 +64,7 @@ Tripteron.Axis.X = -(a1+a2)/2;
 % 6DOF = related to the LFRAME 6DOF fixed on the table = if the table
 % moves, the Tripteron is assumed not to have moved related to this 6DOF =
 % no need to redefine Tripteron axes except if Linmots move or LFRAME moves
-origin   = mean(Marker.LFRAME02);
+origin   = mean(Marker.TRIPTERON_p2);
 LinmotX1 = origin+100*Tripteron.Axis.X';
 LinmotX2 = origin-100*Tripteron.Axis.X';
 % Store virtual markers in btkFile
@@ -88,13 +88,13 @@ clearvars -except Folder Tripteron newbtkFile;
 c3dFile = 'LINMOTY01.c3d';
 btkFile = btkReadAcquisition(c3dFile);
 Marker  = btkGetMarkers(btkFile);
-pointCloud1 = Marker.NEWSTYLUS_09;
+pointCloud1 = Marker.STYLUSa_TIP;
 [x1,a1] = lsplane(pointCloud1);
 % Axis estimation by least-square cylinder approach
 c3dFile = 'LINMOTY02.c3d';
 btkFile = btkReadAcquisition(c3dFile);
 Marker  = btkGetMarkers(btkFile);
-pointCloud2 = Marker.NEWSTYLUS_09;
+pointCloud2 = Marker.STYLUSa_TIP;
 [x2,a2] = lscylinder(pointCloud2,x1,a1,1,1,0.025);
 % Error between the two estimated axes (3d angle, deg)
 errorAngle = rad2deg(atan2(norm(cross(a1,a2)),dot(a1,a2)))
@@ -104,7 +104,7 @@ Tripteron.Axis.Y = (a1+a2)/2;
 % 6DOF = related to the LFRAME 6DOF fixed on the table = if the table
 % moves, the Tripteron is assumed not to have moved related to this 6DOF =
 % no need to redefine Tripteron axes except if Linmots move or LFRAME moves
-origin   = mean(Marker.LFRAME02);
+origin   = mean(Marker.TRIPTERON_p2);
 LinmotY1 = origin+100*Tripteron.Axis.Y';
 LinmotY2 = origin-100*Tripteron.Axis.Y';
 % Store virtual markers in btkFile
@@ -127,13 +127,13 @@ clearvars -except Folder Tripteron newbtkFile;
 c3dFile = 'LINMOTZ01.c3d';
 btkFile = btkReadAcquisition(c3dFile);
 Marker  = btkGetMarkers(btkFile);
-pointCloud1 = Marker.NEWSTYLUS_09;
+pointCloud1 = Marker.STYLUSa_TIP;
 [x1,a1] = lsplane(pointCloud1);
 % Axis estimation by least-square cylinder approach
 c3dFile = 'LINMOTZ02.c3d';
 btkFile = btkReadAcquisition(c3dFile);
 Marker  = btkGetMarkers(btkFile);
-pointCloud2 = Marker.NEWSTYLUS_09;
+pointCloud2 = Marker.STYLUSa_TIP;
 [x2,a2] = lscylinder(pointCloud2,x1,a1,1,1,0.025);
 % Error between the two estimated axes (3d angle, deg)
 errorAngle = rad2deg(atan2(norm(cross(a1,a2)),dot(a1,a2)))
@@ -143,7 +143,7 @@ Tripteron.Axis.Z = (a1+a2)/2;
 % 6DOF = related to the LFRAME 6DOF fixed on the table = if the table
 % moves, the Tripteron is assumed not to have moved related to this 6DOF =
 % no need to redefine Tripteron axes except if Linmots move or LFRAME moves
-origin   = mean(Marker.LFRAME02);
+origin   = mean(Marker.TRIPTERON_p2);
 LinmotZ1 = origin+100*Tripteron.Axis.Z';
 LinmotZ2 = origin-100*Tripteron.Axis.Z';
 % Store virtual markers in btkFile
