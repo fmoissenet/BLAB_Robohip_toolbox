@@ -92,3 +92,38 @@ subplot(1,4,1); hold on; plot(error1.X,'red'); plot(error2.X,'green');
 subplot(1,4,2); hold on; plot(error1.Y,'red'); plot(error2.Y,'green');
 subplot(1,4,3); hold on; plot(error1.Z,'red'); plot(error2.Z,'green');
 subplot(1,4,4); hold on; plot(error1.e3D,'red'); plot(error2.e3D,'green');
+
+%% ------------------------------------------------------------------------
+% TEST
+% ------------------------------------------------------------------------- 
+
+% Set 3D position of the TRIPERON obtained from QTM
+a1 = -0.1000;
+a2 = -0.0600;
+a3 = 0.0200;
+R1 = [1 0 0; 0 cosd(a1) -sind(a1); 0 sind(a1) cosd(a1)];
+R2 = [cosd(a2) 0 sind(a2); 0 1 0; -sind(a2) 0 cosd(a2)];
+R3 = [cosd(a3) -sind(a3) 0; sind(a3) cosd(a3) 0; 0 0 1];
+Rt = R3*R2*R1;
+tt = [537.6600; -549.5800; -2.1600];
+
+% Set rotation matrix obtained from Matlab
+Rt2 = [1 -0.0003 -0.0010; 0.0003 1 0.0017; 0.0010 -0.0017 1];
+
+% Get TRIPTERON markers
+c3dFile = 'test.c3d';
+btkFile = btkReadAcquisition(c3dFile);
+Marker  = btkGetMarkers(btkFile);
+
+% Plot
+figure; hold on; axis equal;
+plot3(mean(Marker.TRIPTERON_p2(:,1)),mean(Marker.TRIPTERON_p2(:,2)),mean(Marker.TRIPTERON_p2(:,3)),'Marker','.','Markersize',15,'Color','red');
+plot3(mean(Marker.LinmotX2(:,1)),mean(Marker.LinmotX2(:,2)),mean(Marker.LinmotX2(:,3)),'Marker','.','Markersize',15,'Color','red');
+plot3(mean(Marker.LinmotY2(:,1)),mean(Marker.LinmotY2(:,2)),mean(Marker.LinmotY2(:,3)),'Marker','.','Markersize',15,'Color','red');
+plot3(mean(Marker.LinmotZ1(:,1)),mean(Marker.LinmotZ1(:,2)),mean(Marker.LinmotZ1(:,3)),'Marker','.','Markersize',15,'Color','red');
+quiver3(tt(1),tt(2),tt(3),Rt(1,1),Rt(2,1),Rt(3,1),100,'red');
+quiver3(tt(1),tt(2),tt(3),Rt(1,2),Rt(2,2),Rt(3,2),100,'green');
+quiver3(tt(1),tt(2),tt(3),Rt(1,3),Rt(2,3),Rt(3,3),100,'blue');
+quiver3(tt(1),tt(2),tt(3),Rt2(1,1),Rt2(2,1),Rt2(3,1),100,'--r');
+quiver3(tt(1),tt(2),tt(3),Rt2(1,2),Rt2(2,2),Rt2(3,2),100,'--g');
+quiver3(tt(1),tt(2),tt(3),Rt2(1,3),Rt2(2,3),Rt2(3,3),100,'--b');
