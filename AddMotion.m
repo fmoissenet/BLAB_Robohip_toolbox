@@ -30,36 +30,54 @@ else
     stop  = start+n-1;    
 end
 
-% Set rotation matrix
-if strcmp(rotationAxis,'X')
-    T_f2_f1   = [ones(1,1,length(angles))       zeros(1,1,length(angles))      zeros(1,1,length(angles))      zeros(1,1,length(angles)); ...
-                 zeros(1,1,length(angles))      permute( cosd(angles),[1,3,2]) permute(-sind(angles),[1,3,2]) zeros(1,1,length(angles)); ...
-                 zeros(1,1,length(angles))      permute( sind(angles),[1,3,2]) permute( cosd(angles),[1,3,2]) zeros(1,1,length(angles)); ...
-                 zeros(1,1,length(angles))      zeros(1,1,length(angles))      zeros(1,1,length(angles))      ones(1,1,length(angles))];     
-elseif strcmp(rotationAxis,'Y')
-    T_f2_f1   = [permute( cosd(angles),[1,3,2]) zeros(1,1,length(angles))      permute( sind(angles),[1,3,2]) zeros(1,1,length(angles)); ...
-                 zeros(1,1,length(angles))      ones(1,1,length(angles))       zeros(1,1,length(angles))      zeros(1,1,length(angles)); ...
-                 permute(-sind(angles),[1,3,2]) zeros(1,1,length(angles))      permute( cosd(angles),[1,3,2]) zeros(1,1,length(angles)); ...
-                 zeros(1,1,length(angles))      zeros(1,1,length(angles))      zeros(1,1,length(angles))      ones(1,1,length(angles))];  
-elseif strcmp(rotationAxis,'Z')
-    T_f2_f1   = [permute( cosd(angles),[1,3,2]) permute(-sind(angles),[1,3,2]) zeros(1,1,length(angles))      zeros(1,1,length(angles)); ...
-                 permute( sind(angles),[1,3,2]) permute( cosd(angles),[1,3,2]) zeros(1,1,length(angles))      zeros(1,1,length(angles)); ...
-                 zeros(1,1,length(angles))      zeros(1,1,length(angles))      ones(1,1,length(angles))       zeros(1,1,length(angles)); ...
-                 zeros(1,1,length(angles))      zeros(1,1,length(angles))      zeros(1,1,length(angles))      ones(1,1,length(angles))]; 
+% Define rotation axes
+if contains(motion,'anatomicAlignement') % ICS axes are used in this case
+    X_ics = [1 0 0];
+    Y_ics = [0 1 0];
+    Z_ics = [0 0 1];
+else % JCS axes in all other cases
+    Y_ics = T_ics_f(1:3,2,end);
+    Y_ics = Y_ics/norm(Y_ics);
+    Z_ics = T_ics_p(1:3,3,end);
+    Z_ics = Z_ics/norm(Z_ics);
+    X_ics = cross(Y_ics,Z_ics);
+    X_ics = X_ics/norm(X_ics);
 end
+
+% Set 3D rotation matrix from axis and angle (https://en.wikipedia.org/wiki/Rotation_matrix)
+if strcmp(rotationAxis,'X')
+    ux = X_ics(1);
+    uy = X_ics(2);
+    uz = X_ics(3);
+elseif strcmp(rotationAxis,'Y')
+    ux = Y_ics(1);
+    uy = Y_ics(2);
+    uz = Y_ics(3);
+elseif strcmp(rotationAxis,'Z')
+    ux = Z_ics(1);
+    uy = Z_ics(2);
+    uz = Z_ics(3);
+end
+T = [permute(cosd(angles),[1,3,2])+ux^2*(1-permute(cosd(angles),[1,3,2]))     ux*uy*(1-permute(cosd(angles),[1,3,2]))-uz*permute(sind(angles),[1,3,2]) ux*uz*(1-permute(cosd(angles),[1,3,2]))+uy*permute(sind(angles),[1,3,2]) zeros(1,1,size(angles,2)); ...
+     uy*ux*(1-permute(cosd(angles),[1,3,2]))+uz*permute(sind(angles),[1,3,2]) permute(cosd(angles),[1,3,2])+uy^2*(1-permute(cosd(angles),[1,3,2]))     uy*uz*(1-permute(cosd(angles),[1,3,2]))-ux*permute(sind(angles),[1,3,2]) zeros(1,1,size(angles,2)); ...
+     uz*ux*(1-permute(cosd(angles),[1,3,2]))-uy*permute(sind(angles),[1,3,2]) uz*uy*(1-permute(cosd(angles),[1,3,2]))+ux*permute(sind(angles),[1,3,2]) permute(cosd(angles),[1,3,2])+uz^2*(1-permute(cosd(angles),[1,3,2]))     zeros(1,1,size(angles,2)); ...
+     zeros(1,1,size(angles,2))                                                zeros(1,1,size(angles,2))                                                zeros(1,1,size(angles,2))                                                ones(1,1,size(angles,2))];
 
 % Store position/orientation of the femur in cameras coordinate system 
 % for each frame of the motion
 T_ics_f0 = T_ics_f(:,:,end); % Last generated bone pose
-T_ics_f  = cat(3,T_ics_f,Mprod_array3(repmat(T_ics_f0,[1 1 size(T_f2_f1,3)]),Minv_array3(T_f2_f1)));
+if contains(motion,'anatomicAlignement')
+    T_ics_f = cat(3,T_ics_f,Mprod_array3(repmat(T_ics_f0,[1 1 size(T,3)]),Minv_array3(T)));
+else
+    temp = Mprod_array3(T(1:3,1:3,:),repmat(T_ics_f0(1:3,1:3,:),[1 1 size(T,3)]));
+    T_ics_f = cat(3,T_ics_f,[temp repmat(T_ics_f0(1:3,4,:),[1 1 size(T,3)]); repmat([0 0 0 1],[1 1 size(T,3)])]);
+    clear temp;
+end
 
 % Store position/orientation of the flange in cameras coordinate system 
 % for each frame of the motion (apply a rigid transformation T_f_fl to the
 % previously computed position/orientation of the femur)
 T_ics_fl = Mprod_array3(T_ics_f,repmat(T_f_fl,[1 1 size(T_ics_f,3)]));
-if order == 1
-    T_ics_fl(:,4,:) = T_ics_fl(:,4,:)+repmat([0 0 1.5 1]',[1 1 size(T_ics_fl,3)]); % Not explained yet
-end
 
 % Generate the planning file for the KUKA robot
 if order < 10

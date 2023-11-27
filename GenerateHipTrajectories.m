@@ -30,8 +30,8 @@ clc;
 % SET FOLDERS
 % -------------------------------------------------------------------------
 Folder.toolbox = 'C:\Users\moissene\OneDrive - unige.ch\2022 - ROBOHIP\Development\Biomécanique\BLAB_Robohip_toolbox\';
-Folder.data    = 'C:\Users\moissene\OneDrive - unige.ch\2022 - ROBOHIP\Data\Tests\Essais_20230913\';
-Folder.export  = 'C:\Users\moissene\OneDrive - unige.ch\2022 - ROBOHIP\Data\Tests\Essais_20230913\';
+Folder.data    = 'C:\Users\moissene\OneDrive - unige.ch\2022 - ROBOHIP\Data\Tests\Essais_20231124\';
+Folder.export  = 'C:\Users\moissene\OneDrive - unige.ch\2022 - ROBOHIP\Data\Tests\Essais_20231124\';
 Folder.dep     = [Folder.toolbox,'dependencies\'];
 addpath(Folder.toolbox);
 addpath(genpath(Folder.dep));
@@ -43,11 +43,6 @@ cd(Folder.data);
 Specimen.id   = 'RH000';
 Specimen.side = 'R'; % R or L
 
-% -------------------------------------------------------------------------
-% SET ROBOT PARAMETERS
-% -------------------------------------------------------------------------
-Robot.ThicknessBotaPlate = 10; % Thickness of the Bota sensor plate (mm)
-
 %% ------------------------------------------------------------------------
 % TO BE DONE BEFORE
 % -------------------------------------------------------------------------
@@ -55,6 +50,9 @@ Robot.ThicknessBotaPlate = 10; % Thickness of the Bota sensor plate (mm)
 
 %% ------------------------------------------------------------------------
 % 1. DEFINE PELVIS CLUSTER TECHNICAL FRAME
+% -------------------------------------------------------------------------
+% - BONE PINS inserted into the iliac spine, 6 and 9.5 mm from ASI, 
+%   pointing superiorly
 % -------------------------------------------------------------------------
 % - In QTM, record the position of the pelvis cluster markers PELVIS_ci and  
 %   point anatomical landmarks PELVIS_RASI, PELVIS_LASI, PELVIS_RPSI,
@@ -71,19 +69,23 @@ Robot.ThicknessBotaPlate = 10; % Thickness of the Bota sensor plate (mm)
 % - Recompute 6DOF and save file
 
 %% ------------------------------------------------------------------------
-% 2. DEFINE RFEMUR CLUSTER TECHNICAL FRAME
+% 2. DEFINE R/LFEMUR CLUSTER TECHNICAL FRAME
 % -------------------------------------------------------------------------
-% - In QTM, record the position of the right femur cluster markers 
-%   RFEMUR_ci and point anatomical landmarks RFEMUR_RFLE and RFEMUR_RFME
-% - Store records in 6DOFs_RFEMUR_01.qtm
+% - BONE PINS at 7.5 mm and 11 mm from fossa trochanterica, pointing
+%   laterally
+% -------------------------------------------------------------------------
+% - In QTM, record the position of the right/left femur cluster markers 
+%   R/LFEMUR_ci and point anatomical landmarks R/LFEMUR_R/LFLE and 
+%   R/LFEMUR_R/LFME
+% - Store records in 6DOFs_R/LFEMUR_01.qtm
 % - Create one point trajectory (virtual marker) defined as the middle of 
-%   RFEMUR_RFLE and RFEMUR_RFME, called RFEMUR_RKJC
-% - Define a new 6DOFs object RFEMUR_cluster with RFEMUR_ci, RFEMUR_RFLE,
-%   RFEMUR_RFME, RFEMUR_RKJC
-% - Translate the 6DOFs object to RFEMUR_c1
+%   R/LFEMUR_R/LFLE and R/LFEMUR_R/LFME, called R/LFEMUR_R/LKJC
+% - Define a new 6DOFs object RFEMUR_cluster with R/LFEMUR_ci, 
+%   R/LFEMUR_R/LFLE, R/LFEMUR_R/LFME, R/LFEMUR_R/LKJC
+% - Translate the 6DOFs object to R/LFEMUR_c1
 % - Rotate the 6DOFs object as X from c3 to c1 and Y parallel to a line 
 %   from c2 to c1
-% - Recompute 6DOF and save file
+% - Recompute 6DOF and save fileo
 
 %% ------------------------------------------------------------------------
 % 3. COMPUTE THE HIP JOINT CENTRES
@@ -122,34 +124,38 @@ Trf = [Xrf Yrf Zrf Orf; zeros(1,3,nMarker) ones(1,1,nMarker)];
 
 % Compute the local position of RHJC in pelvis cluster coordinate system,
 % and in right femur cluster coordinate system
-[rC,rCsi,rCsj,Residual] = SCoRE_array3(Tp,Trf)
+[rC,rCsi,rCsj,Residual] = SCoRE_array3(Tp,Trf);
+disp(['RHJC coordinates in pelvis frame: ',num2str(rCsi(1)),'; ',num2str(rCsi(2)),'; ',num2str(rCsi(3))]);
+disp(['RHJC coordinates in right femur frame: ',num2str(rCsj(1)),'; ',num2str(rCsj(2)),'; ',num2str(rCsj(3))]);
 
 % Clear workspace
 clearvars -except Folder Subject Robot;
 
-% Load C3D file 
-[Marker,Event,firstFrame,nMarker,fMarker,markerNames] = LoadC3DFile('JC_LHIP.c3d');
-
-% Define a technical coordinate system related to the pelvis cluster as 
-% defined in QTM
-Op = Marker.PELVIS_c1;
-Xp = Vnorm_array3(Marker.PELVIS_c1-Marker.PELVIS_c3);
-Yp = Vnorm_array3(Marker.PELVIS_c1-Marker.PELVIS_c2);
-Zp = Vnorm_array3(cross(Xp,Yp));
-Yp = Vnorm_array3(cross(Zp,Xp));
-Tp = [Xp Yp Zp Op; zeros(1,3,nMarker) ones(1,1,nMarker)];
-
-% Define a technical coordinate system related to the rfemur cluster as 
-% defined in QTM
-Olf = Marker.LFEMUR_c1;
-Xlf = Vnorm_array3(Marker.LFEMUR_c1-Marker.LFEMUR_c3);
-Ylf = Vnorm_array3(Marker.LFEMUR_c1-Marker.LFEMUR_c2);
-Zlf = Vnorm_array3(cross(Xlf,Ylf));
-Ylf = Vnorm_array3(cross(Zlf,Xlf));
-Tlf = [Xlf Ylf Zlf Olf; zeros(1,3,nMarker) ones(1,1,nMarker)];
-
-% Compute the local position of RHJC in pelvis cluster coordinate system
-[rC,rCsi,rCsj,Residual] = SCoRE_array3(Tp,Tlf)
+% % Load C3D file 
+% [Marker,Event,firstFrame,nMarker,fMarker,markerNames] = LoadC3DFile('JC_LHIP.c3d');
+% 
+% % Define a technical coordinate system related to the pelvis cluster as 
+% % defined in QTM
+% Op = Marker.PELVIS_c1;
+% Xp = Vnorm_array3(Marker.PELVIS_c1-Marker.PELVIS_c3);
+% Yp = Vnorm_array3(Marker.PELVIS_c1-Marker.PELVIS_c2);
+% Zp = Vnorm_array3(cross(Xp,Yp));
+% Yp = Vnorm_array3(cross(Zp,Xp));
+% Tp = [Xp Yp Zp Op; zeros(1,3,nMarker) ones(1,1,nMarker)];
+% 
+% % Define a technical coordinate system related to the rfemur cluster as 
+% % defined in QTM
+% Olf = Marker.LFEMUR_c1;
+% Xlf = Vnorm_array3(Marker.LFEMUR_c1-Marker.LFEMUR_c3);
+% Ylf = Vnorm_array3(Marker.LFEMUR_c1-Marker.LFEMUR_c2);
+% Zlf = Vnorm_array3(cross(Xlf,Ylf));
+% Ylf = Vnorm_array3(cross(Zlf,Xlf));
+% Tlf = [Xlf Ylf Zlf Olf; zeros(1,3,nMarker) ones(1,1,nMarker)];
+% 
+% % Compute the local position of RHJC in pelvis cluster coordinate system
+% [rC,rCsi,rCsj,Residual] = SCoRE_array3(Tp,Tlf);
+% disp(['LHJC coordinates in pelvis frame: ',num2str(rCsi(1)),'; ',num2str(rCsi(2)),'; ',num2str(rCsi(3))]);
+% disp(['LHJC coordinates in left femur frame: ',num2str(rCsj(1)),'; ',num2str(rCsj(2)),'; ',num2str(rCsj(3))]);
 
 %% ------------------------------------------------------------------------
 % 4. DEFINE PELVIS ANATOMICAL FRAME
@@ -162,7 +168,7 @@ Tlf = [Xlf Ylf Zlf Olf; zeros(1,3,nMarker) ones(1,1,nMarker)];
 %   PELVIS_LHJC, called PELVIS_MHJC
 % - Add PELVIS_MHJC to PELVIS_cluster 6DOFs object
 % - Translate the 6DOFs object to PELVIS_MHJC
-% - Rotate the 6DOFs object as Z from PELVIS_LHJC to PELVIS_RHJC and X
+% - Rotate the 6DOFs object as Z from PELVIS_LASI to PELVIS_RASI and X
 %   parallel to a line defined from PELVIS_MPSI to PELVIS_MASI
 % - Rename PELVIS_cluster 6DOFs object as PELVIS_anatomical
 % - Recompute 6DOF and save file
@@ -171,11 +177,11 @@ Tlf = [Xlf Ylf Zlf Olf; zeros(1,3,nMarker) ones(1,1,nMarker)];
 % 5. ADJUST THE PELVIS POSITION AND ORIENTATION
 % -------------------------------------------------------------------------
 % - Using PELVIS_cluster 6DOFs object position and orientation provided in
-%   real time by QTM, align Zp with Y, and place PELVIS_MHJC at almost the
-%   following position: 
+%   real time by QTM, align Zp with Y, and place the HJC of the analysed 
+%   side at almost the following position: TO BE DEFINED
 
 %% ------------------------------------------------------------------------
-% 6. DEFINE THE RFEMUR COORDINATE SYSTEM
+% 6. DEFINE THE R/LFEMUR COORDINATE SYSTEM
 % -------------------------------------------------------------------------
 % - In QTM, open 6DOFs_RFEMUR_01.qtm
 % - Report the values of RHJC as a virtual point of the RFEMUR_cluster  
@@ -203,10 +209,10 @@ Tlf = [Xlf Ylf Zlf Olf; zeros(1,3,nMarker) ones(1,1,nMarker)];
 
 % Clear workspace
 clearvars -except Folder Specimen Robot;
-% clc;
+clc;
 
 % Load C3D file 
-[Marker,Event,firstFrame,nMarker,fMarker,markerNames] = LoadC3DFile('STATIC_RFEMUR_01.c3d');
+[Marker,Event,firstFrame,nMarker,fMarker,markerNames] = LoadC3DFile('STATIC_RHIP.c3d');
 
 % Compute mean marker position across all frames
 for imarker = 1:size(markerNames,1)
@@ -230,11 +236,11 @@ Rf      = [Xf Yf Zf];
 T_ics_f = [Rf Of; 0 0 0 1];
 
 % Compute angle difference between pelvis and rfemur coordinate systems
-% Express Euler angle using the ZXY sequence
+% Express Euler angle using the YXZ sequence
 % i.e. which angles to apply to the femur to be aligned with the pelvis
 temp  = Mprod_array3(Tinv_array3(T_ics_p),T_ics_f);
 Euler = rad2deg(R2fixedYXZ_array3(temp(1:3,1:3,:)));
-disp(['Initial alignment differences between femur and pelvis (ZXY): ',num2str(Euler),'°']);
+disp(['Initial alignment differences between femur and pelvis (YXZ): ',num2str(Euler),'°']);
 
 % Define KUKA_flange coordinate system
 Ofl      = Marker.KUKA_flange_04;
@@ -253,100 +259,121 @@ T_f_fl = Mprod_array3(Minv_array3(T_ics_f),T_ics_fl);
 start     = 0;
 stop      = 0;
 order     = 0;
-precision = 0.05; % deg
+precision = 0.1; % deg
 
 % Set motion list
 % Motion name | Rotation axis | Angle values
 % One planning file for the KUKA robot is written for each motion
-% Angles are cumulative (i.e. after 30° of flexion, only 30° needed to
-% reach 60°)
-% motionList = {...
-%               'anatomicAlignementZ' 'Z' 0:sign(Euler(1))*precision:Euler(1); ...
-%               'anatomicAlignementX' 'X' 0:sign(Euler(2))*precision:Euler(2); ...
-%               'anatomicAlignementY' 'Y' 0:sign(Euler(3))*precision:Euler(3); ...
-%               'extension30'         'Z' 0:1*precision:30; ...
-%               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
-%               'intRotation90b'      'Y' 0:1*precision:90; ... % return
-%               'extRotation90a'      'Y' 0:1*precision:90; ... % go
-%               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
-%               'extension20'         'Z' 0:-1*precision:-10; ...
-%               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
-%               'intRotation90b'      'Y' 0:1*precision:90; ... % return
-%               'extRotation90a'      'Y' 0:1*precision:90; ... % go
-%               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
-%               'flexion0'            'Z' 0:-1*precision:-20; ...
-%               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
-%               'intRotation90b'      'Y' 0:1*precision:90; ... % return
-%               'extRotation90a'      'Y' 0:1*precision:90; ... % go
-%               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
-%               'flexion20'           'Z' 0:-1*precision:-20; ...
-%               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
-%               'intRotation90b'      'Y' 0:1*precision:90; ... % return
-%               'extRotation90a'      'Y' 0:1*precision:90; ... % go
-%               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
-%               'flexion40'           'Z' 0:-1*precision:-20; ...
-%               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
-%               'intRotation90b'      'Y' 0:1*precision:90; ... % return
-%               'extRotation90a'      'Y' 0:1*precision:90; ... % go
-%               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
-%               'flexion60'           'Z' 0:-1*precision:-20; ...
-%               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
-%               'intRotation90b'      'Y' 0:1*precision:90; ... % return
-%               'extRotation90a'      'Y' 0:1*precision:90; ... % go
-%               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
-%               'flexion80'           'Z' 0:-1*precision:-20; ...
-%               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
-%               'intRotation90b'      'Y' 0:1*precision:90; ... % return
-%               'extRotation90a'      'Y' 0:1*precision:90; ... % go
-%               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
-%               'flexion100'          'Z' 0:-1*precision:-20; ...
-%               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
-%               'intRotation90b'      'Y' 0:1*precision:90; ... % return
-%               'extRotation90a'      'Y' 0:1*precision:90; ... % go
-%               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
-%               'flexion120'          'Z' 0:-1*precision:-20; ...
-%               'intRotation90a'      'Y' 0:-1*precision:-90; ... % go
-%               'intRotation90b'      'Y' 0:1*precision:90; ... % return
-%               'extRotation90a'      'Y' 0:1*precision:90; ... % go
-%               'extRotation90b'      'Y' 0:-1*precision:-90; ... % return
-%               'flexion0'            'Z' 0:1*precision:120; ...
-%               };
+% Angles are cumulative
+
+% ABD 0°
 motionList = {...
-              'anatomicAlignementY' 'Y' 0:sign(Euler(1))*precision:Euler(1); ...
-              'anatomicAlignementX' 'X' 0:sign(Euler(2))*precision:Euler(2); ...
-              'anatomicAlignementZ' 'Z' 0:sign(Euler(3))*precision:Euler(3); ...
-              'extension30'         'Z' 0:1*precision:30; ...
-              'intRotation45a'      'Y' 0:-1*precision:-45; ... % go
-              'intRotation45b'      'Y' 0:1*precision:45; ... % return
-              'extRotation45a'      'Y' 0:1*precision:45; ... % go
-              'extRotation45b'      'Y' 0:-1*precision:-45; ... % return
-              'extension20'         'Z' 0:-1*precision:-10; ...
-              'intRotation45a'      'Y' 0:-1*precision:-45; ... % go
-              'intRotation45b'      'Y' 0:1*precision:45; ... % return
-              'extRotation45a'      'Y' 0:1*precision:45; ... % go
-              'extRotation45b'      'Y' 0:-1*precision:-45; ... % return
-              'flexion0'            'Z' 0:-1*precision:-20; ...
-              'intRotation45a'      'Y' 0:-1*precision:-45; ... % go
-              'intRotation45b'      'Y' 0:1*precision:45; ... % return
-              'extRotation45a'      'Y' 0:1*precision:45; ... % go
-              'extRotation45b'      'Y' 0:-1*precision:-45; ... % return
-              'flexion20'           'Z' 0:-1*precision:-20; ...
-              'intRotation45a'      'Y' 0:-1*precision:-45; ... % go
-              'intRotation45b'      'Y' 0:1*precision:45; ... % return
-              'extRotation45a'      'Y' 0:1*precision:45; ... % go
-              'extRotation45b'      'Y' 0:-1*precision:-45; ... % return
-              'flexion40'           'Z' 0:-1*precision:-20; ...
-              'intRotation45a'      'Y' 0:-1*precision:-45; ... % go
-              'intRotation45b'      'Y' 0:1*precision:45; ... % return
-              'extRotation45a'      'Y' 0:1*precision:45; ... % go
-              'extRotation45b'      'Y' 0:-1*precision:-45; ... % return
-              'flexion60'           'Z' 0:-1*precision:-20; ...
-              'intRotation45a'      'Y' 0:-1*precision:-45; ... % go
-              'intRotation45b'      'Y' 0:1*precision:45; ... % return
-              'extRotation45a'      'Y' 0:1*precision:45; ... % go
-              'extRotation45b'      'Y' 0:-1*precision:-45; ... % return
-              'flexion0'            'Z' 0:1*precision:60; ... % return
+              'anatomicAlignementY' 'Y' linspace(sign(Euler(1))*precision,Euler(1),fix(abs(Euler(1))/precision)); ...
+              'anatomicAlignementX' 'X' linspace(sign(Euler(2))*precision,Euler(2),fix(abs(Euler(2))/precision)); ...
+              'anatomicAlignementZ' 'Z' linspace(sign(Euler(3))*precision,Euler(3),fix(abs(Euler(3))/precision)); ...
+              'extension30'         'Z' linspace(-precision,-30,fix(30/precision)); ...
+              'intRotation40a'      'Y' linspace(precision,40,fix(40/precision)); ...
+              'intRotation40b'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+              'extRotation40a'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+              'extRotation40b'      'Y' linspace(precision,40,fix(40/precision)); ...
+              'flexion0'            'Z' linspace(precision,30,fix(30/precision)); ...
+              'intRotation40a'      'Y' linspace(precision,40,fix(40/precision)); ...
+              'intRotation40b'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+              'extRotation40a'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+              'extRotation40b'      'Y' linspace(precision,40,fix(40/precision)); ...
+              'flexion30'           'Z' linspace(precision,30,fix(30/precision)); ...
+              'intRotation40a'      'Y' linspace(precision,40,fix(40/precision)); ...
+              'intRotation40b'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+              'extRotation40a'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+              'extRotation40b'      'Y' linspace(precision,40,fix(40/precision)); ...
+              'flexion60'           'Z' linspace(precision,30,fix(30/precision)); ...
+              'intRotation40a'      'Y' linspace(precision,40,fix(40/precision)); ...
+              'intRotation40b'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+              'extRotation40a'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+              'extRotation40b'      'Y' linspace(precision,40,fix(40/precision)); ...
+              'flexion90'           'Z' linspace(precision,30,fix(30/precision)); ...
+              'intRotation40a'      'Y' linspace(precision,40,fix(40/precision)); ...
+              'intRotation40b'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+              'extRotation40a'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+              'extRotation40b'      'Y' linspace(precision,40,fix(40/precision)); ...
+              'flexion60'           'Z' linspace(-precision,-30,fix(30/precision)); ...
+              'flexion30'           'Z' linspace(-precision,-30,fix(30/precision)); ...
+              'flexion0'            'Z' linspace(-precision,-30,fix(30/precision)); ...
               };
+
+% ABD 15°
+% motionList = {...
+%               'anatomicAlignementY' 'Y' linspace(sign(Euler(1))*precision,Euler(1),fix(abs(Euler(1))/precision)); ...
+%               'anatomicAlignementX' 'X' linspace(sign(Euler(2))*precision,Euler(2),fix(abs(Euler(2))/precision)); ...
+%               'anatomicAlignementZ' 'Z' linspace(sign(Euler(3))*precision,Euler(3),fix(abs(Euler(3))/precision)); ...
+%               'abduction15'         'X' linspace(-precision,-15,fix(15/precision)); ...
+%               'extension30'         'Z' linspace(-precision,-30,fix(30/precision)); ...
+%               'intRotation40a'      'Y' linspace(precision,40,fix(40/precision)); ...
+%               'intRotation40b'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+%               'extRotation40a'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+%               'extRotation40b'      'Y' linspace(precision,40,fix(40/precision)); ...
+%               'flexion0'            'Z' linspace(precision,30,fix(30/precision)); ...
+%               'intRotation40a'      'Y' linspace(precision,40,fix(40/precision)); ...
+%               'intRotation40b'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+%               'extRotation40a'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+%               'extRotation40b'      'Y' linspace(precision,40,fix(40/precision)); ...
+%               'flexion30'           'Z' linspace(precision,30,fix(30/precision)); ...
+%               'intRotation40a'      'Y' linspace(precision,40,fix(40/precision)); ...
+%               'intRotation40b'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+%               'extRotation40a'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+%               'extRotation40b'      'Y' linspace(precision,40,fix(40/precision)); ...
+%               'flexion60'           'Z' linspace(precision,30,fix(30/precision)); ...
+%               'intRotation40a'      'Y' linspace(precision,40,fix(40/precision)); ...
+%               'intRotation40b'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+%               'extRotation40a'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+%               'extRotation40b'      'Y' linspace(precision,40,fix(40/precision)); ...
+%               'flexion90'           'Z' linspace(precision,30,fix(30/precision)); ...
+%               'intRotation40a'      'Y' linspace(precision,40,fix(40/precision)); ...
+%               'intRotation40b'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+%               'extRotation40a'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+%               'extRotation40b'      'Y' linspace(precision,40,fix(40/precision)); ...
+%               'flexion60'           'Z' linspace(-precision,-30,fix(30/precision)); ...
+%               'flexion30'           'Z' linspace(-precision,-30,fix(30/precision)); ...
+%               'flexion0'            'Z' linspace(-precision,-30,fix(30/precision)); ...
+%               'abduction0'          'X' linspace(precision,15,fix(15/precision)); ...
+%               };
+
+% ABD 30°
+% motionList = {...
+%               'anatomicAlignementY' 'Y' linspace(sign(Euler(1))*precision,Euler(1),fix(abs(Euler(1))/precision)); ...
+%               'anatomicAlignementX' 'X' linspace(sign(Euler(2))*precision,Euler(2),fix(abs(Euler(2))/precision)); ...
+%               'anatomicAlignementZ' 'Z' linspace(sign(Euler(3))*precision,Euler(3),fix(abs(Euler(3))/precision)); ...
+%               'abduction30'         'X' linspace(-precision,-30,fix(30/precision)); ...
+%               'extension30'         'Z' linspace(-precision,-30,fix(30/precision)); ...
+%               'intRotation40a'      'Y' linspace(precision,40,fix(40/precision)); ...
+%               'intRotation40b'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+%               'extRotation40a'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+%               'extRotation40b'      'Y' linspace(precision,40,fix(40/precision)); ...
+%               'flexion0'            'Z' linspace(precision,30,fix(30/precision)); ...
+%               'intRotation40a'      'Y' linspace(precision,40,fix(40/precision)); ...
+%               'intRotation40b'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+%               'extRotation40a'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+%               'extRotation40b'      'Y' linspace(precision,40,fix(40/precision)); ...
+%               'flexion30'           'Z' linspace(precision,30,fix(30/precision)); ...
+%               'intRotation40a'      'Y' linspace(precision,40,fix(40/precision)); ...
+%               'intRotation40b'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+%               'extRotation40a'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+%               'extRotation40b'      'Y' linspace(precision,40,fix(40/precision)); ...
+%               'flexion60'           'Z' linspace(precision,30,fix(30/precision)); ...
+%               'intRotation40a'      'Y' linspace(precision,40,fix(40/precision)); ...
+%               'intRotation40b'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+%               'extRotation40a'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+%               'extRotation40b'      'Y' linspace(precision,40,fix(40/precision)); ...
+%               'flexion90'           'Z' linspace(precision,30,fix(30/precision)); ...
+%               'intRotation40a'      'Y' linspace(precision,40,fix(40/precision)); ...
+%               'intRotation40b'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+%               'extRotation40a'      'Y' linspace(-precision,-40,fix(40/precision)); ...
+%               'extRotation40b'      'Y' linspace(precision,40,fix(40/precision)); ...
+%               'flexion60'           'Z' linspace(-precision,-30,fix(30/precision)); ...
+%               'flexion30'           'Z' linspace(-precision,-30,fix(30/precision)); ...
+%               'flexion0'            'Z' linspace(-precision,-30,fix(30/precision)); ...
+%               'abduction0'          'X' linspace(precision,30,fix(30/precision)); ...
+%               };
 
 % Generate requested motions
 % Update the T_ics_f matrix
@@ -357,31 +384,34 @@ for imotion = 1:size(motionList,1)
     temp = Mprod_array3(Tinv_array3(T_ics_p),T_ics_f(:,:,end));
     R    = temp(1:3,1:3);
     % Plot the resulting angular values
-    Euler2 = rad2deg(R2mobileZXY_array3(R)); % Difference with target for each angle should be <1°
-    disp(['Angle values around each axis of the hip JCS (ZXY): ',num2str(round(Euler2(1),1)),' | ',num2str(round(Euler2(2),1)),' | ',num2str(round(Euler2(3),1)),'°']);
-    clear temp R x y z error x_ort y_ort z_ortEuler2;    
+    Euler2 = rad2deg(R2fixedYXZ_array3(R)); % Difference with target for each angle should be <1°
+    disp(['Angle values around each axis of the hip JCS (YXZ): ',num2str(round(Euler2(1),1)),' | ',num2str(round(Euler2(2),1)),' | ',num2str(round(Euler2(3),1)),'°']);
+    clear temp R x y z error x_ort y_ort z_ort Euler2;
 end
 
 %% Plot (ONLY FOR TEST)
 localRFLE = Mprod_array3(Minv_array3(T_ics_f(:,:,1)),[Marker.RFEMUR_RFLE;1]);
 localRFME = Mprod_array3(Minv_array3(T_ics_f(:,:,1)),[Marker.RFEMUR_RFME;1]);
 localRKJC = Mprod_array3(Minv_array3(T_ics_f(:,:,1)),[Marker.RFEMUR_RKJC;1]);
+localRHJC = Mprod_array3(Minv_array3(T_ics_f(:,:,1)),[Marker.RFEMUR_RHJC;1]);
 Marker.RFEMUR_RFLE = Mprod_array3(T_ics_f,repmat(localRFLE,[1 1 stop+1]));
 Marker.RFEMUR_RFME = Mprod_array3(T_ics_f,repmat(localRFME,[1 1 stop+1]));
 Marker.RFEMUR_RKJC = Mprod_array3(T_ics_f,repmat(localRKJC,[1 1 stop+1]));
+Marker.RFEMUR_RHJC = Mprod_array3(T_ics_f,repmat(localRHJC,[1 1 stop+1]));
 
 figure(1);
-for iframe = 1:10:stop
+for iframe = 1:20:stop
     % Markers
     plot3(Marker.PELVIS_RASI(1,:,1),Marker.PELVIS_RASI(2,:,1),Marker.PELVIS_RASI(3,:,1),'Marker','.','MarkerSize',20,'Color','black');
-    hold on; axis equal;
+    hold on; axis equal; view(0,90);
     plot3(Marker.PELVIS_LASI(1,:,1),Marker.PELVIS_LASI(2,:,1),Marker.PELVIS_LASI(3,:,1),'Marker','.','MarkerSize',20,'Color','black');
     plot3(Marker.PELVIS_RPSI(1,:,1),Marker.PELVIS_RPSI(2,:,1),Marker.PELVIS_RPSI(3,:,1),'Marker','.','MarkerSize',20,'Color','black');
     plot3(Marker.PELVIS_LPSI(1,:,1),Marker.PELVIS_LPSI(2,:,1),Marker.PELVIS_LPSI(3,:,1),'Marker','.','MarkerSize',20,'Color','black');
-    plot3(Marker.PELVIS_RHJC(1,:,1),Marker.PELVIS_RHJC(2,:,1),Marker.PELVIS_RHJC(3,:,1),'Marker','.','MarkerSize',20,'Color','red');
+    plot3(Marker.PELVIS_RHJC(1,:,1),Marker.PELVIS_RHJC(2,:,1),Marker.PELVIS_RHJC(3,:,1),'Marker','.','MarkerSize',20,'Color','green');
     plot3(Marker.RFEMUR_RFLE(1,:,iframe),Marker.RFEMUR_RFLE(2,:,iframe),Marker.RFEMUR_RFLE(3,:,iframe),'Marker','.','MarkerSize',20,'Color','black');
     plot3(Marker.RFEMUR_RFME(1,:,iframe),Marker.RFEMUR_RFME(2,:,iframe),Marker.RFEMUR_RFME(3,:,iframe),'Marker','.','MarkerSize',20,'Color','black');
     plot3(Marker.RFEMUR_RKJC(1,:,iframe),Marker.RFEMUR_RKJC(2,:,iframe),Marker.RFEMUR_RKJC(3,:,iframe),'Marker','.','MarkerSize',20,'Color','red');
+    plot3(Marker.RFEMUR_RHJC(1,:,iframe),Marker.RFEMUR_RHJC(2,:,iframe),Marker.RFEMUR_RHJC(3,:,iframe),'Marker','+','MarkerSize',20,'Color','red');
     % Segments
     line([Marker.RFEMUR_RKJC(1,:,iframe) Marker.PELVIS_RHJC(1,:,1)], ...
          [Marker.RFEMUR_RKJC(2,:,iframe) Marker.PELVIS_RHJC(2,:,1)], ...
